@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   ALLAN MULTISERVICE GROUP — Brand System
+   Sky blue + Pink + White · Premium minimalism
+   Owner brand colors win on any conflict.
+   ============================================================ */
+
+@theme {
+  /* Brand core */
+  --color-sky: #0C8CE0;
+  --color-sky-hover: #0A78C2;
+  --color-sky-soft: #E8F4FD;
+  --color-sky-tint: #F2F9FE;
+
+  --color-pink: #FF4D8D;
+  --color-pink-hover: #F0357A;
+  --color-pink-soft: #FFE3EE;
+
+  --color-ink: #0B1B2B;
+  --color-ink-soft: #25394B;
+
+  --color-surface: #F6F9FC;
+  --color-line: #E3EBF2;
+  --color-muted: #6B8299;
+
+  /* Semantic */
+  --color-background: #FFFFFF;
+  --color-foreground: #0B1B2B;
+
+  /* Fonts (bound to next/font CSS vars) */
+  --font-display: var(--font-space-grotesk), "Space Grotesk", system-ui, sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+
+  /* Radius scale */
+  --radius-card: 18px;
+  --radius-pill: 999px;
+
+  /* Layered, color-tinted shadows (never flat) */
+  --shadow-soft: 0 1px 2px rgba(11, 27, 43, 0.04), 0 8px 24px rgba(11, 27, 43, 0.06);
+  --shadow-lift: 0 2px 4px rgba(11, 27, 43, 0.05), 0 18px 40px rgba(12, 140, 224, 0.12);
+  --shadow-pink: 0 8px 30px rgba(255, 77, 141, 0.28);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--color-ink);
+}
+
+::selection {
+  background: var(--color-pink);
+  color: #fff;
+}
+
+/* Mono label / eyebrow */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-sky);
+}
+
+/* Reusable display gradient text */
+.text-gradient {
+  background: linear-gradient(100deg, var(--color-sky) 0%, var(--color-pink) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Container */
+.container-x {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+  .container-x { padding-inline: 2rem; }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-surface); }
+::-webkit-scrollbar-thumb { background: #c9d8e6; border-radius: 999px; border: 2px solid var(--color-surface); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-sky); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
 }
