@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFeatured, getCounts } from "@/lib/listings";
-import { getSettings, usdRate } from "@/lib/settings";
+import { getApprovedTestimonials } from "@/lib/testimonials";
+import { getSettings, getRate } from "@/lib/settings";
 import { VERTICALS, SITE, type VerticalKey } from "@/lib/site";
 import ListingCard from "@/components/ListingCard";
 import Hero from "@/components/Hero";
@@ -26,8 +27,10 @@ const VERT_ICON: Record<VerticalKey, React.FC<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const [featured, counts, settings] = await Promise.all([getFeatured(6), getCounts(), getSettings()]);
-  const rate = usdRate(settings);
+  const [featured, counts, settings, testimonials] = await Promise.all([
+    getFeatured(6), getCounts(), getSettings(), getApprovedTestimonials(),
+  ]);
+  const rate = await getRate(settings);
 
   return (
     <>
@@ -174,34 +177,41 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-surface)] py-20">
-        <div className="container-x">
-          <Reveal className="mb-10 text-center">
-            <p className="eyebrow">Trusted by buyers</p>
-            <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] font-bold">What people say</h2>
-          </Reveal>
-          <div className="grid gap-5 md:grid-cols-3">
-            {TESTIMONIALS.map((t, i) => (
-              <Reveal key={t.name} delay={i * 70} as="article">
-                <figure className="flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-soft)]">
-                  <div className="flex gap-0.5 text-[var(--color-pink)]">
-                    {Array.from({ length: 5 }).map((_, k) => <IconStar key={k} className="h-4 w-4" fill="currentColor" />)}
-                  </div>
-                  <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-[var(--color-ink-soft)]">“{t.quote}”</blockquote>
-                  <figcaption className="mt-5 flex items-center gap-3">
-                    <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--color-sky-soft)] font-semibold text-[var(--color-sky)]">{t.name[0]}</span>
-                    <span>
-                      <span className="block text-sm font-semibold text-[var(--color-ink)]">{t.name}</span>
-                      <span className="block text-xs text-[var(--color-muted)]">{t.role}</span>
-                    </span>
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
+      {/* ── TESTIMONIALS (admin-approved; hidden until real reviews exist) ── */}
+      {testimonials.length > 0 && (
+        <section className="border-y border-[var(--color-line)] bg-[var(--color-surface)] py-20">
+          <div className="container-x">
+            <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-4 text-center sm:text-left">
+              <div>
+                <p className="eyebrow">Trusted by buyers</p>
+                <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] font-bold">What people say</h2>
+              </div>
+              <Link href="/review" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-sky)] hover:text-[var(--color-sky-hover)]">
+                Leave a review <IconArrow className="h-4 w-4" />
+              </Link>
+            </Reveal>
+            <div className="grid gap-5 md:grid-cols-3">
+              {testimonials.slice(0, 6).map((t, i) => (
+                <Reveal key={t.id} delay={(i % 3) * 70} as="article">
+                  <figure className="flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-soft)]">
+                    <div className="flex gap-0.5 text-[var(--color-pink)]">
+                      {Array.from({ length: Math.max(1, Math.min(5, t.rating)) }).map((_, k) => <IconStar key={k} className="h-4 w-4" fill="currentColor" />)}
+                    </div>
+                    <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-[var(--color-ink-soft)]">“{t.quote}”</blockquote>
+                    <figcaption className="mt-5 flex items-center gap-3">
+                      <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--color-sky-soft)] font-semibold text-[var(--color-sky)]">{t.name[0]}</span>
+                      <span>
+                        <span className="block text-sm font-semibold text-[var(--color-ink)]">{t.name}</span>
+                        {t.role && <span className="block text-xs text-[var(--color-muted)]">{t.role}</span>}
+                      </span>
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── FAQ ── */}
       <section className="container-x py-20">
@@ -259,12 +269,6 @@ const DIASPORA_POINTS = [
   "Title verified on the RLMUA land portal",
   "Live video viewings before you commit",
   "Every price shown in RWF and USD",
-];
-
-const TESTIMONIALS = [
-  { name: "Diane U.", role: "Bought a home in Kibagabaga", quote: "I was in Belgium the whole time. They sent videos, verified the title, and handled the transfer. I got the keys on my first trip back." },
-  { name: "Jean-Paul N.", role: "Bought land in Bugesera", quote: "Clear papers, fair price, no games. The plot was exactly what the photos showed — rare in this market." },
-  { name: "Aline K.", role: "Rented in Kimihurura", quote: "Found a furnished apartment in two days over WhatsApp. No agent runaround, no fake listings." },
 ];
 
 const FAQ = [

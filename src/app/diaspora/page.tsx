@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getSettings, usdRate } from "@/lib/settings";
+import { getSettings, getRate } from "@/lib/settings";
 import { SITE, waLink } from "@/lib/site";
 import Reveal from "@/components/Reveal";
 import AlertsForm from "@/components/AlertsForm";
@@ -32,7 +32,7 @@ const FAQ = [
 
 export default async function DiasporaPage() {
   const settings = await getSettings();
-  const rate = usdRate(settings);
+  const rate = await getRate(settings);
 
   return (
     <>

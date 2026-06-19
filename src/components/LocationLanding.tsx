@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getListings } from "@/lib/listings";
-import { getSettings, usdRate } from "@/lib/settings";
+import { getSettings, getRate } from "@/lib/settings";
 import { VERTICAL_BY_DB, SITE } from "@/lib/site";
 import { FEATURED_LOCATIONS, type RwLocation } from "@/lib/locations";
 import type { Vertical } from "@/lib/types";
@@ -24,7 +24,7 @@ export default async function LocationLanding({
     getListings({ vertical, location: location.name }),
     getSettings(),
   ]);
-  const rate = usdRate(settings);
+  const rate = await getRate(settings);
   const meta = VERTICAL_BY_DB[vertical];
   const others = FEATURED_LOCATIONS.filter((l) => l.slug !== location.slug).slice(0, 12);
 

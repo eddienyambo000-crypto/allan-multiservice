@@ -3,7 +3,7 @@ import Image from "next/image";
 import { SITE, VERTICALS } from "@/lib/site";
 import { FEATURED_LOCATIONS } from "@/lib/locations";
 import { getSettings } from "@/lib/settings";
-import { IconWhatsApp, IconPin, IconPhone, IconArrow } from "@/components/icons";
+import { IconWhatsApp, IconPin, IconPhone, IconArrow, IconInstagram, IconTikTok } from "@/components/icons";
 
 export default async function Footer() {
   const settings = await getSettings();
@@ -31,6 +31,10 @@ export default async function Footer() {
           <a href={`https://wa.me/${settings.whatsapp ?? SITE.whatsapp}`} target="_blank" rel="noopener" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5">
             <IconWhatsApp className="h-4 w-4" /> Chat on WhatsApp
           </a>
+          <div className="mt-5 flex items-center gap-2.5">
+            <a href={SITE.instagram} target="_blank" rel="noopener" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-[var(--color-line)] bg-white text-[var(--color-ink)] transition-colors hover:border-[var(--color-pink)] hover:text-[var(--color-pink)]"><IconInstagram className="h-[18px] w-[18px]" /></a>
+            <a href={SITE.tiktok} target="_blank" rel="noopener" aria-label="TikTok" className="grid h-9 w-9 place-items-center rounded-full border border-[var(--color-line)] bg-white text-[var(--color-ink)] transition-colors hover:border-[var(--color-sky)] hover:text-[var(--color-sky)]"><IconTikTok className="h-[18px] w-[18px]" /></a>
+          </div>
         </div>
 
         <div>
@@ -57,6 +61,8 @@ export default async function Footer() {
             ))}
             <li><Link href="/about" className="text-sm text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-sky)]">About</Link></li>
             <li><Link href="/contact" className="text-sm text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-sky)]">Contact</Link></li>
+            <li><Link href="/review" className="text-sm text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-sky)]">Leave a review</Link></li>
+            <li><Link href="/privacy" className="text-sm text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-sky)]">Privacy</Link></li>
           </ul>
         </div>
 

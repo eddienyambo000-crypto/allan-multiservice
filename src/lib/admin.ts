@@ -1,7 +1,7 @@
 import { getBrowserSupabase } from "./supabase";
 import { DB, BUCKET } from "./site";
 import { cloudinaryConfigured, uploadToCloudinary } from "./cloudinary";
-import type { Listing, SiteSettings } from "./types";
+import type { Listing, SiteSettings, Testimonial } from "./types";
 
 function client() {
   const sb = getBrowserSupabase();
@@ -108,5 +108,29 @@ export async function adminLeads(): Promise<LeadRow[]> {
 export async function adminMarkLead(kind: LeadRow["kind"], id: string, handled: boolean): Promise<void> {
   const table = kind === "alert" ? DB.alerts : DB.inquiries;
   const { error } = await client().from(table).update({ handled }).eq("id", id);
+  if (error) throw error;
+}
+
+/* ── Testimonials ── */
+export async function adminTestimonials(): Promise<Testimonial[]> {
+  const { data, error } = await client().from(DB.testimonials).select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Testimonial[];
+}
+
+export async function adminSetTestimonialApproved(id: string, approved: boolean): Promise<void> {
+  const { error } = await client().from(DB.testimonials).update({ approved }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function adminDeleteTestimonial(id: string): Promise<void> {
+  const { error } = await client().from(DB.testimonials).delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function adminAddTestimonial(t: { name: string; role?: string; quote: string; rating?: number }): Promise<void> {
+  const { error } = await client().from(DB.testimonials).insert({
+    name: t.name, role: t.role || null, quote: t.quote, rating: t.rating ?? 5, approved: true,
+  });
   if (error) throw error;
 }

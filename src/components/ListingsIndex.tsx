@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getListings } from "@/lib/listings";
-import { getSettings, usdRate } from "@/lib/settings";
+import { getSettings, getRate } from "@/lib/settings";
 import { parseFilters, type RawParams } from "@/lib/params";
 import { VERTICAL_BY_DB } from "@/lib/site";
 import { FEATURED_LOCATIONS } from "@/lib/locations";
@@ -24,7 +24,7 @@ export default async function ListingsIndex({
 }) {
   const filters = parseFilters(vertical, searchParams);
   const [listings, settings] = await Promise.all([getListings(filters), getSettings()]);
-  const rate = usdRate(settings);
+  const rate = await getRate(settings);
   const meta = VERTICAL_BY_DB[vertical];
   const popular = FEATURED_LOCATIONS.slice(0, 10);
 

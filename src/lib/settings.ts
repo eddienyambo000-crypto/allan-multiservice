@@ -49,3 +49,13 @@ function stripNulls<T extends object>(obj: T): Partial<T> {
 export function usdRate(s: SiteSettings): number {
   return s.usd_rate && s.usd_rate > 0 ? s.usd_rate : DEFAULT_USD_RATE;
 }
+
+/**
+ * The rate to actually use: live market rate when available, otherwise the
+ * admin-set rate, otherwise the default. Keeps USD figures current automatically.
+ */
+export async function getRate(s: SiteSettings): Promise<number> {
+  const { getLiveUsdRate } = await import("./fxrate");
+  const live = await getLiveUsdRate();
+  return live ?? usdRate(s);
+}

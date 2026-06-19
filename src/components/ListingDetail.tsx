@@ -3,7 +3,7 @@ import type { Listing } from "@/lib/types";
 import { VERTICAL_BY_DB, SITE } from "@/lib/site";
 import { specChips } from "@/lib/format";
 import { getRelated } from "@/lib/listings";
-import { getSettings, usdRate } from "@/lib/settings";
+import { getSettings, getRate } from "@/lib/settings";
 import { listingSchema, breadcrumbSchema } from "@/lib/schema";
 import Gallery from "@/components/Gallery";
 import InquiryForm from "@/components/InquiryForm";
@@ -19,7 +19,7 @@ export default async function ListingDetail({ listing }: { listing: Listing }) {
   const meta = VERTICAL_BY_DB[listing.vertical];
   const chips = specChips(listing);
   const [related, settings] = await Promise.all([getRelated(listing, 3), getSettings()]);
-  const rate = usdRate(settings);
+  const rate = await getRate(settings);
   const crumb = [
     { name: "Home", url: SITE.url },
     { name: meta.short, url: `${SITE.url}${meta.href}` },

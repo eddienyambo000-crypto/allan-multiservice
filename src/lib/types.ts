@@ -77,6 +77,16 @@ export interface Alert {
   max_price?: number | null;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string | null;
+  quote: string;
+  rating: number;
+  approved: boolean;
+  created_at: string;
+}
+
 export interface SiteSettings {
   logo_url: string | null;
   hero_media_type: "gradient" | "image" | "video";

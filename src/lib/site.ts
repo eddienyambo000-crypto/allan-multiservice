@@ -17,7 +17,8 @@ export const SITE = {
   email: "info@allanmultiservice.rw",
   location: "Kigali, Rwanda",
   address: "Kigali Nyarugenge, Rwanda",
-  instagram: "https://www.instagram.com/",
+  instagram: "https://www.instagram.com/allan_multi_services_group_ltd/",
+  tiktok: "https://www.tiktok.com/@allan.multiservic",
   builtByUrl: "https://eddie-portfolio-gamma.vercel.app",
 } as const;
 
@@ -28,6 +29,7 @@ export const DB = {
   inquiries: "allan_inquiries",
   alerts: "allan_alerts",
   settings: "allan_settings",
+  testimonials: "allan_testimonials",
 } as const;
 
 export const BUCKET = {

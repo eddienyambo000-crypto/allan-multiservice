@@ -95,11 +95,30 @@ create table if not exists allan_settings (
 );
 insert into allan_settings (id) values (1) on conflict (id) do nothing;
 
+-- ── Testimonials (admin-approved; public can submit) ──────────
+create table if not exists allan_testimonials (
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null,
+  role       text,
+  quote      text not null,
+  rating     int not null default 5,
+  approved   boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 -- ── Row Level Security ────────────────────────────────────────
-alter table allan_listings  enable row level security;
-alter table allan_inquiries enable row level security;
-alter table allan_alerts    enable row level security;
-alter table allan_settings  enable row level security;
+alter table allan_listings     enable row level security;
+alter table allan_inquiries    enable row level security;
+alter table allan_alerts       enable row level security;
+alter table allan_settings     enable row level security;
+alter table allan_testimonials enable row level security;
+
+drop policy if exists "allan public read approved reviews" on allan_testimonials;
+create policy "allan public read approved reviews" on allan_testimonials for select using (approved = true);
+drop policy if exists "allan public submit reviews" on allan_testimonials;
+create policy "allan public submit reviews" on allan_testimonials for insert with check (approved = false);
+drop policy if exists "allan owner manage reviews" on allan_testimonials;
+create policy "allan owner manage reviews" on allan_testimonials for all to authenticated using (true) with check (true);
 
 drop policy if exists "allan public read listings" on allan_listings;
 create policy "allan public read listings" on allan_listings for select using (true);

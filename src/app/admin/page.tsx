@@ -8,6 +8,7 @@ import { VERTICAL_BY_DB } from "@/lib/site";
 import type { Listing } from "@/lib/types";
 import ListingForm from "@/components/admin/ListingForm";
 import SettingsTab from "@/components/admin/SettingsTab";
+import ReviewsManager from "@/components/admin/ReviewsManager";
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -80,7 +81,7 @@ function Login() {
 
 /* ───────────────────────── Dashboard ───────────────────────── */
 function Dashboard({ email }: { email: string }) {
-  const [tab, setTab] = useState<"listings" | "leads" | "settings">("listings");
+  const [tab, setTab] = useState<"listings" | "leads" | "reviews" | "settings">("listings");
   async function signOut() { await getBrowserSupabase()!.auth.signOut(); }
 
   return (
@@ -97,7 +98,7 @@ function Dashboard({ email }: { email: string }) {
         </div>
 
         <div className="mb-6 inline-flex rounded-full border border-[var(--color-line)] bg-white p-1">
-          {(["listings", "leads", "settings"] as const).map((t) => (
+          {(["listings", "leads", "reviews", "settings"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition-colors ${tab === t ? "bg-[var(--color-sky)] text-white" : "text-[var(--color-ink-soft)]"}`}>
               {t}
@@ -105,7 +106,7 @@ function Dashboard({ email }: { email: string }) {
           ))}
         </div>
 
-        {tab === "listings" ? <ListingsManager /> : tab === "leads" ? <LeadsManager /> : <SettingsTab />}
+        {tab === "listings" ? <ListingsManager /> : tab === "leads" ? <LeadsManager /> : tab === "reviews" ? <ReviewsManager /> : <SettingsTab />}
       </div>
     </div>
   );
