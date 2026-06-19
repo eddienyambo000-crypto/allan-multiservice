@@ -1,9 +1,10 @@
 import { unstable_cache } from "next/cache";
 import { getSupabase } from "./supabase";
 import { SEED_LISTINGS } from "./seed";
+import { DB } from "./site";
 import type { Listing, ListingFilters, Vertical } from "./types";
 
-const TABLE = "listings";
+const TABLE = DB.listings;
 
 /**
  * Fetch the full listing set once and cache it (revalidated every 5 min).

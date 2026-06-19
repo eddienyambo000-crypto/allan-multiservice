@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase";
-import { SITE } from "./site";
+import { SITE, DB } from "./site";
 import { DEFAULT_USD_RATE } from "./money";
 import type { SiteSettings } from "./types";
 
@@ -27,7 +27,7 @@ export async function getSettings(): Promise<SiteSettings> {
   const sb = getSupabase();
   if (sb) {
     try {
-      const { data, error } = await sb.from("site_settings").select("*").eq("id", 1).maybeSingle();
+      const { data, error } = await sb.from(DB.settings).select("*").eq("id", 1).maybeSingle();
       if (error) throw error;
       if (data) return { ...DEFAULT_SETTINGS, ...stripNulls(data as Partial<SiteSettings>) };
     } catch {

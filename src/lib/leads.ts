@@ -1,4 +1,5 @@
 import { getSupabase } from "./supabase";
+import { DB } from "./site";
 import type { Inquiry, Alert } from "./types";
 
 export interface LeadResult {
@@ -11,7 +12,7 @@ export async function submitInquiry(data: Inquiry): Promise<LeadResult> {
   const sb = getSupabase();
   if (!sb) return { ok: true, stored: false };
   try {
-    const { error } = await sb.from("inquiries").insert({
+    const { error } = await sb.from(DB.inquiries).insert({
       kind: data.kind ?? "inquiry",
       name: data.name,
       phone: data.phone,
@@ -31,7 +32,7 @@ export async function submitAlert(data: Alert): Promise<LeadResult> {
   const sb = getSupabase();
   if (!sb) return { ok: true, stored: false };
   try {
-    const { error } = await sb.from("alerts").insert({
+    const { error } = await sb.from(DB.alerts).insert({
       channel: data.channel,
       contact: data.contact,
       vertical: data.vertical || null,

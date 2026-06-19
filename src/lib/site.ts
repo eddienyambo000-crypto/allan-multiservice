@@ -21,6 +21,20 @@ export const SITE = {
   builtByUrl: "https://eddie-portfolio-gamma.vercel.app",
 } as const;
 
+// Namespaced DB tables + storage buckets so this app can safely share a
+// Supabase project with other sites (no name collisions).
+export const DB = {
+  listings: "allan_listings",
+  inquiries: "allan_inquiries",
+  alerts: "allan_alerts",
+  settings: "allan_settings",
+} as const;
+
+export const BUCKET = {
+  media: "allan-listings",
+  branding: "allan-branding",
+} as const;
+
 export type VerticalKey = "properties" | "land" | "cars" | "rentals";
 
 export interface VerticalMeta {

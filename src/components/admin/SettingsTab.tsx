@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { adminGetSettings, adminSaveSettings, adminUploadImage } from "@/lib/admin";
+import { BUCKET } from "@/lib/site";
 import type { SiteSettings } from "@/lib/types";
 
 export default function SettingsTab() {
@@ -21,7 +22,7 @@ export default function SettingsTab() {
     if (!file) return;
     setBusy(true); setErr(""); setMsg("");
     try {
-      const url = await adminUploadImage(file, "branding");
+      const url = await adminUploadImage(file, BUCKET.branding);
       if (kind === "logo") set("logo_url", url);
       else { set("hero_media_url", url); set("hero_media_type", file.type.startsWith("video") ? "video" : "image"); }
     } catch (e) { setErr(e instanceof Error ? e.message : "Upload failed."); }

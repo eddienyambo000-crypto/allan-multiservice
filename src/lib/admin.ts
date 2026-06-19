@@ -1,4 +1,5 @@
 import { getBrowserSupabase } from "./supabase";
+import { DB, BUCKET } from "./site";
 import type { Listing, SiteSettings } from "./types";
 
 function client() {
@@ -19,23 +20,23 @@ export function slugify(s: string): string {
 
 /* ── Listings ── */
 export async function adminListAll(): Promise<Listing[]> {
-  const { data, error } = await client().from("listings").select("*").order("created_at", { ascending: false });
+  const { data, error } = await client().from(DB.listings).select("*").order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Listing[];
 }
 
 export async function adminUpsert(listing: Partial<Listing>): Promise<void> {
-  const { error } = await client().from("listings").upsert(listing, { onConflict: "id" });
+  const { error } = await client().from(DB.listings).upsert(listing, { onConflict: "id" });
   if (error) throw error;
 }
 
 export async function adminDelete(id: string): Promise<void> {
-  const { error } = await client().from("listings").delete().eq("id", id);
+  const { error } = await client().from(DB.listings).delete().eq("id", id);
   if (error) throw error;
 }
 
 /** Upload an image/video to a public Storage bucket; returns its public URL. */
-export async function adminUploadImage(file: File, bucket: "listings" | "branding" = "listings"): Promise<string> {
+export async function adminUploadImage(file: File, bucket: string = BUCKET.media): Promise<string> {
   const sb = client();
   const ext = file.name.split(".").pop() || "jpg";
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -46,13 +47,13 @@ export async function adminUploadImage(file: File, bucket: "listings" | "brandin
 
 /* ── Settings ── */
 export async function adminGetSettings(): Promise<Partial<SiteSettings>> {
-  const { data, error } = await client().from("site_settings").select("*").eq("id", 1).maybeSingle();
+  const { data, error } = await client().from(DB.settings).select("*").eq("id", 1).maybeSingle();
   if (error) throw error;
   return (data ?? {}) as Partial<SiteSettings>;
 }
 
 export async function adminSaveSettings(patch: Partial<SiteSettings>): Promise<void> {
-  const { error } = await client().from("site_settings").upsert({ id: 1, ...patch, updated_at: new Date().toISOString() });
+  const { error } = await client().from(DB.settings).upsert({ id: 1, ...patch, updated_at: new Date().toISOString() });
   if (error) throw error;
 }
 
@@ -79,8 +80,8 @@ export interface LeadRow {
 export async function adminLeads(): Promise<LeadRow[]> {
   const sb = client();
   const [inq, alerts] = await Promise.all([
-    sb.from("inquiries").select("*").order("created_at", { ascending: false }),
-    sb.from("alerts").select("*").order("created_at", { ascending: false }),
+    sb.from(DB.inquiries).select("*").order("created_at", { ascending: false }),
+    sb.from(DB.alerts).select("*").order("created_at", { ascending: false }),
   ]);
   if (inq.error) throw inq.error;
   if (alerts.error) throw alerts.error;
@@ -90,7 +91,7 @@ export async function adminLeads(): Promise<LeadRow[]> {
 }
 
 export async function adminMarkLead(kind: LeadRow["kind"], id: string, handled: boolean): Promise<void> {
-  const table = kind === "alert" ? "alerts" : "inquiries";
+  const table = kind === "alert" ? DB.alerts : DB.inquiries;
   const { error } = await client().from(table).update({ handled }).eq("id", id);
   if (error) throw error;
 }
