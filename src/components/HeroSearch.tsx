@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { VERTICALS, KIGALI_AREAS, type VerticalKey } from "@/lib/site";
+import { VERTICALS, type VerticalKey } from "@/lib/site";
+import { FILTER_LOCATIONS } from "@/lib/locations";
 import { IconSearch } from "@/components/icons";
 
 export default function HeroSearch() {
@@ -48,8 +49,8 @@ export default function HeroSearch() {
           onChange={(e) => setLocation(e.target.value)}
           className="w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-[var(--color-ink)] outline-none"
         >
-          <option value="">{isCars ? "Anywhere in Kigali" : "All areas"}</option>
-          {KIGALI_AREAS.map((a) => (
+          <option value="">{isCars ? "Anywhere in Rwanda" : "All locations"}</option>
+          {FILTER_LOCATIONS.map((a) => (
             <option key={a} value={a}>{a}</option>
           ))}
         </select>

@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { KIGALI_AREAS } from "@/lib/site";
+import { FILTER_LOCATIONS } from "@/lib/locations";
 import type { Vertical } from "@/lib/types";
 import { IconSearch, IconClose } from "@/components/icons";
 
@@ -68,7 +68,7 @@ export default function FilterBar({ vertical }: { vertical: Vertical }) {
 
         <Select label="Location" value={get("location")} onChange={(v) => setParam("location", v)}>
           <option value="">All areas</option>
-          {KIGALI_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+          {FILTER_LOCATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
         </Select>
 
         {vertical === "car" && (

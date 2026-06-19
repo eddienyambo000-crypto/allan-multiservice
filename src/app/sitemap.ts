@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { SITE, VERTICALS, KIGALI_AREAS } from "@/lib/site";
-import { VERTICAL_BY_DB } from "@/lib/site";
+import { SITE, VERTICALS, VERTICAL_BY_DB } from "@/lib/site";
+import { LOCATIONS } from "@/lib/locations";
 import { getAllSlugs } from "@/lib/listings";
 
 const base = process.env.NEXT_PUBLIC_SITE_URL || SITE.url;
@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: base, changeFrequency: "daily", priority: 1 },
-    { url: `${base}/sell`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/diaspora`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/about`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/contact`, changeFrequency: "monthly", priority: 0.5 },
   ];
@@ -21,12 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  // Programmatic location landing pages (residential verticals)
-  const locationPages: MetadataRoute.Sitemap = ["/properties", "/rentals"].flatMap((href) =>
-    KIGALI_AREAS.map((area) => ({
-      url: `${base}${href}/kigali/${area.toLowerCase().replace(/\s+/g, "-")}`,
+  // Programmatic location landing pages across all verticals & all Rwanda.
+  const locationPages: MetadataRoute.Sitemap = VERTICALS.flatMap((v) =>
+    LOCATIONS.map((loc) => ({
+      url: `${base}${v.href}/location/${loc.slug}`,
       changeFrequency: "weekly" as const,
-      priority: 0.7,
+      priority: loc.featured ? 0.7 : 0.5,
     }))
   );
 

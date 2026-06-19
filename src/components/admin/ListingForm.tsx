@@ -35,19 +35,34 @@ export default function ListingForm({
   const isLand = f.vertical === "land";
   const isCar = f.vertical === "car";
 
+  const MAX_IMAGES = 10;
+
   async function handleImages(files: FileList | null) {
     if (!files?.length) return;
+    const current = f.images ?? [];
+    const room = MAX_IMAGES - current.length;
+    if (room <= 0) { setErr(`Maximum ${MAX_IMAGES} photos. Remove one to add more.`); return; }
+    const toAdd = Array.from(files).slice(0, room);
     setBusy(true);
     setErr("");
     try {
       const urls: string[] = [];
-      for (const file of Array.from(files)) urls.push(await adminUploadImage(file));
-      set("images", [...(f.images ?? []), ...urls]);
+      for (const file of toAdd) urls.push(await adminUploadImage(file));
+      set("images", [...current, ...urls]);
+      if (Array.from(files).length > room) setErr(`Only the first ${room} were added — ${MAX_IMAGES} photo max.`);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Image upload failed.");
     } finally {
       setBusy(false);
     }
+  }
+
+  function moveImage(from: number, dir: -1 | 1) {
+    const imgs = [...(f.images ?? [])];
+    const to = from + dir;
+    if (to < 0 || to >= imgs.length) return;
+    [imgs[from], imgs[to]] = [imgs[to], imgs[from]];
+    set("images", imgs);
   }
 
   async function save(e: React.FormEvent) {
@@ -146,6 +161,17 @@ export default function ListingForm({
         </div>
       )}
 
+      {(isLand || isResidential) && (
+        <Field label="Tenure (shown to diaspora buyers)">
+          <select value={f.tenure ?? ""} onChange={(e) => set("tenure", e.target.value)} className={inputCls}>
+            <option value="">Not specified</option>
+            <option value="Freehold">Freehold</option>
+            <option value="Leasehold (99yr)">Leasehold (99yr)</option>
+            <option value="Leasehold (49yr)">Leasehold (49yr)</option>
+          </select>
+        </Field>
+      )}
+
       {isCar && (
         <>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -175,24 +201,37 @@ export default function ListingForm({
         />
       </Field>
 
-      {/* Images */}
-      <Field label="Photos">
-        <input type="file" accept="image/*" multiple onChange={(e) => handleImages(e.target.files)} className="text-sm" />
+      <Field label="Video tour URL (YouTube/Vimeo — optional)">
+        <input value={f.video_url ?? ""} onChange={(e) => set("video_url", e.target.value)} className={inputCls} placeholder="https://youtu.be/…" />
+      </Field>
+
+      {/* Images — up to 10, reorderable, first is the cover */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="font-[family-name:var(--font-mono)] text-[0.6rem] uppercase tracking-wider text-[var(--color-muted)]">
+            Photos ({(f.images ?? []).length}/{MAX_IMAGES}) — first photo is the cover
+          </span>
+          <label className={`cursor-pointer rounded-lg border border-[var(--color-sky)] px-3 py-1.5 text-xs font-semibold text-[var(--color-sky)] ${busy ? "opacity-50" : "hover:bg-[var(--color-sky-soft)]"}`}>
+            {busy ? "Uploading…" : "+ Add photos"}
+            <input type="file" accept="image/*" multiple disabled={busy} onChange={(e) => { handleImages(e.target.files); e.target.value = ""; }} className="hidden" />
+          </label>
+        </div>
         {(f.images ?? []).length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
             {(f.images ?? []).map((src, i) => (
-              <div key={src + i} className="relative h-16 w-24 overflow-hidden rounded-lg border border-[var(--color-line)]">
-                <Image src={src} alt="" fill sizes="96px" className="object-cover" />
-                <button
-                  type="button"
-                  onClick={() => set("images", (f.images ?? []).filter((_, j) => j !== i))}
-                  className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-black/60 text-xs text-white"
-                >×</button>
+              <div key={src + i} className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--color-line)]">
+                <Image src={src} alt="" fill sizes="120px" className="object-cover" />
+                {i === 0 && <span className="absolute left-1 top-1 rounded bg-[var(--color-sky)] px-1.5 py-0.5 text-[0.55rem] font-bold uppercase text-white">Cover</span>}
+                <button type="button" onClick={() => set("images", (f.images ?? []).filter((_, j) => j !== i))} className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-black/60 text-xs text-white" aria-label="Remove photo">×</button>
+                <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/45 px-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button type="button" onClick={() => moveImage(i, -1)} disabled={i === 0} className="px-1 text-white disabled:opacity-30" aria-label="Move left">‹</button>
+                  <button type="button" onClick={() => moveImage(i, 1)} disabled={i === (f.images ?? []).length - 1} className="px-1 text-white disabled:opacity-30" aria-label="Move right">›</button>
+                </div>
               </div>
             ))}
           </div>
         )}
-      </Field>
+      </div>
 
       <label className="flex items-center gap-2 text-sm font-medium text-[var(--color-ink)]">
         <input type="checkbox" checked={!!f.featured} onChange={(e) => set("featured", e.target.checked)} />

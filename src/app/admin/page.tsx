@@ -7,6 +7,7 @@ import { adminListAll, adminDelete, adminLeads, adminMarkLead, type LeadRow } fr
 import { VERTICAL_BY_DB } from "@/lib/site";
 import type { Listing } from "@/lib/types";
 import ListingForm from "@/components/admin/ListingForm";
+import SettingsTab from "@/components/admin/SettingsTab";
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -79,7 +80,7 @@ function Login() {
 
 /* ───────────────────────── Dashboard ───────────────────────── */
 function Dashboard({ email }: { email: string }) {
-  const [tab, setTab] = useState<"listings" | "leads">("listings");
+  const [tab, setTab] = useState<"listings" | "leads" | "settings">("listings");
   async function signOut() { await getBrowserSupabase()!.auth.signOut(); }
 
   return (
@@ -96,7 +97,7 @@ function Dashboard({ email }: { email: string }) {
         </div>
 
         <div className="mb-6 inline-flex rounded-full border border-[var(--color-line)] bg-white p-1">
-          {(["listings", "leads"] as const).map((t) => (
+          {(["listings", "leads", "settings"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition-colors ${tab === t ? "bg-[var(--color-sky)] text-white" : "text-[var(--color-ink-soft)]"}`}>
               {t}
@@ -104,7 +105,7 @@ function Dashboard({ email }: { email: string }) {
           ))}
         </div>
 
-        {tab === "listings" ? <ListingsManager /> : <LeadsManager />}
+        {tab === "listings" ? <ListingsManager /> : tab === "leads" ? <LeadsManager /> : <SettingsTab />}
       </div>
     </div>
   );
@@ -206,13 +207,23 @@ function LeadsManager() {
         <div key={l.kind + l.id} className={`rounded-[var(--radius-card)] border bg-white p-4 ${l.handled ? "border-[var(--color-line)] opacity-60" : "border-[color-mix(in_srgb,var(--color-sky)_40%,transparent)] shadow-[var(--shadow-soft)]"}`}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className={`rounded-full px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider ${l.kind === "seller" ? "bg-[var(--color-pink-soft)] text-[var(--color-pink-hover)]" : "bg-[var(--color-sky-soft)] text-[var(--color-sky-hover)]"}`}>
-                {l.kind === "seller" ? "Seller lead" : "Buyer inquiry"}
+              <span className={`rounded-full px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider ${LEAD_BADGE[l.kind]}`}>
+                {LEAD_LABEL[l.kind]}
               </span>
-              <p className="mt-2 font-semibold text-[var(--color-ink)]">{l.name} · <a href={`tel:${l.phone}`} className="text-[var(--color-sky)]">{l.phone}</a></p>
-              {l.kind === "seller"
-                ? <p className="text-sm text-[var(--color-ink-soft)]">Wants to sell: <b>{l.asset_title}</b> ({l.vertical}). {l.details}</p>
-                : <p className="text-sm text-[var(--color-ink-soft)]">{l.listing_title ? <>Re: <b>{l.listing_title}</b>. </> : null}{l.message}</p>}
+              {l.kind === "alert" ? (
+                <>
+                  <p className="mt-2 font-semibold text-[var(--color-ink)]">
+                    <a href={l.contact?.includes("@") ? `mailto:${l.contact}` : `tel:${l.contact}`} className="text-[var(--color-sky)]">{l.contact}</a>
+                    <span className="text-[var(--color-muted)]"> · via {l.channel}</span>
+                  </p>
+                  <p className="text-sm text-[var(--color-ink-soft)]">Wants: <b>{l.vertical ?? "any"}</b>{l.location ? <> in <b>{l.location}</b></> : null}{l.max_price ? <> under RWF {Number(l.max_price).toLocaleString()}</> : null}</p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-2 font-semibold text-[var(--color-ink)]">{l.name} · <a href={`tel:${l.phone}`} className="text-[var(--color-sky)]">{l.phone}</a></p>
+                  <p className="text-sm text-[var(--color-ink-soft)]">{l.listing_title ? <>Re: <b>{l.listing_title}</b>. </> : null}{l.message}</p>
+                </>
+              )}
               <p className="mt-1 text-xs text-[var(--color-muted)]">{new Date(l.created_at).toLocaleString()}</p>
             </div>
             <button onClick={() => toggle(l)} className="shrink-0 rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-semibold text-[var(--color-ink)] hover:border-[var(--color-sky)]">
@@ -227,6 +238,19 @@ function LeadsManager() {
 }
 
 /* ───────────────────────── shared ───────────────────────── */
+const LEAD_LABEL: Record<LeadRow["kind"], string> = {
+  inquiry: "Buyer inquiry",
+  video_tour: "Video tour request",
+  concierge: "Find-it-for-me",
+  alert: "Listing alert",
+};
+const LEAD_BADGE: Record<LeadRow["kind"], string> = {
+  inquiry: "bg-[var(--color-sky-soft)] text-[var(--color-sky-hover)]",
+  video_tour: "bg-[var(--color-pink-soft)] text-[var(--color-pink-hover)]",
+  concierge: "bg-[#E7F7EF] text-[#1FA971]",
+  alert: "bg-[var(--color-surface)] text-[var(--color-ink-soft)]",
+};
+
 const fieldCls = "w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-sky)]";
 
 function Centered({ children }: { children: React.ReactNode }) {

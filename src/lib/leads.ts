@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase";
-import type { Inquiry, SellerLead } from "./types";
+import type { Inquiry, Alert } from "./types";
 
 export interface LeadResult {
   ok: boolean;
@@ -12,6 +12,7 @@ export async function submitInquiry(data: Inquiry): Promise<LeadResult> {
   if (!sb) return { ok: true, stored: false };
   try {
     const { error } = await sb.from("inquiries").insert({
+      kind: data.kind ?? "inquiry",
       name: data.name,
       phone: data.phone,
       email: data.email || null,
@@ -26,16 +27,16 @@ export async function submitInquiry(data: Inquiry): Promise<LeadResult> {
   }
 }
 
-export async function submitSellerLead(data: SellerLead): Promise<LeadResult> {
+export async function submitAlert(data: Alert): Promise<LeadResult> {
   const sb = getSupabase();
   if (!sb) return { ok: true, stored: false };
   try {
-    const { error } = await sb.from("seller_leads").insert({
-      vertical: data.vertical,
-      name: data.name,
-      phone: data.phone,
-      asset_title: data.asset_title,
-      details: data.details || null,
+    const { error } = await sb.from("alerts").insert({
+      channel: data.channel,
+      contact: data.contact,
+      vertical: data.vertical || null,
+      location: data.location || null,
+      max_price: data.max_price || null,
     });
     if (error) throw error;
     return { ok: true, stored: true };

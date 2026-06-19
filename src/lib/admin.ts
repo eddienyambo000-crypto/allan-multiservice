@@ -1,7 +1,5 @@
 import { getBrowserSupabase } from "./supabase";
-import type { Listing } from "./types";
-
-const BUCKET = "listings";
+import type { Listing, SiteSettings } from "./types";
 
 function client() {
   const sb = getBrowserSupabase();
@@ -19,6 +17,7 @@ export function slugify(s: string): string {
     .slice(0, 70);
 }
 
+/* ── Listings ── */
 export async function adminListAll(): Promise<Listing[]> {
   const { data, error } = await client().from("listings").select("*").order("created_at", { ascending: false });
   if (error) throw error;
@@ -35,48 +34,63 @@ export async function adminDelete(id: string): Promise<void> {
   if (error) throw error;
 }
 
-/** Upload an image to Storage; returns its public URL. */
-export async function adminUploadImage(file: File): Promise<string> {
+/** Upload an image/video to a public Storage bucket; returns its public URL. */
+export async function adminUploadImage(file: File, bucket: "listings" | "branding" = "listings"): Promise<string> {
   const sb = client();
   const ext = file.name.split(".").pop() || "jpg";
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await sb.storage.from(BUCKET).upload(path, file, { upsert: false });
+  const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: false });
   if (error) throw error;
-  return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  return sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
+/* ── Settings ── */
+export async function adminGetSettings(): Promise<Partial<SiteSettings>> {
+  const { data, error } = await client().from("site_settings").select("*").eq("id", 1).maybeSingle();
+  if (error) throw error;
+  return (data ?? {}) as Partial<SiteSettings>;
+}
+
+export async function adminSaveSettings(patch: Partial<SiteSettings>): Promise<void> {
+  const { error } = await client().from("site_settings").upsert({ id: 1, ...patch, updated_at: new Date().toISOString() });
+  if (error) throw error;
+}
+
+/* ── Leads (inquiries + alerts) ── */
 export interface LeadRow {
   id: string;
-  name: string;
-  phone: string;
   created_at: string;
   handled: boolean;
+  kind: "inquiry" | "video_tour" | "concierge" | "alert";
   // inquiry
+  name?: string;
+  phone?: string;
+  email?: string | null;
   message?: string | null;
   listing_title?: string | null;
-  email?: string | null;
-  // seller
-  vertical?: string;
-  asset_title?: string;
-  details?: string | null;
-  kind: "inquiry" | "seller";
+  // alert
+  channel?: string;
+  contact?: string;
+  vertical?: string | null;
+  location?: string | null;
+  max_price?: number | null;
 }
 
 export async function adminLeads(): Promise<LeadRow[]> {
   const sb = client();
-  const [inq, sell] = await Promise.all([
+  const [inq, alerts] = await Promise.all([
     sb.from("inquiries").select("*").order("created_at", { ascending: false }),
-    sb.from("seller_leads").select("*").order("created_at", { ascending: false }),
+    sb.from("alerts").select("*").order("created_at", { ascending: false }),
   ]);
   if (inq.error) throw inq.error;
-  if (sell.error) throw sell.error;
-  const a: LeadRow[] = (inq.data ?? []).map((r) => ({ ...r, kind: "inquiry" as const }));
-  const b: LeadRow[] = (sell.data ?? []).map((r) => ({ ...r, kind: "seller" as const }));
+  if (alerts.error) throw alerts.error;
+  const a: LeadRow[] = (inq.data ?? []).map((r) => ({ ...r, kind: (r.kind ?? "inquiry") as LeadRow["kind"] }));
+  const b: LeadRow[] = (alerts.data ?? []).map((r) => ({ ...r, kind: "alert" as const }));
   return [...a, ...b].sort((x, y) => +new Date(y.created_at) - +new Date(x.created_at));
 }
 
-export async function adminMarkLead(kind: "inquiry" | "seller", id: string, handled: boolean): Promise<void> {
-  const table = kind === "inquiry" ? "inquiries" : "seller_leads";
+export async function adminMarkLead(kind: LeadRow["kind"], id: string, handled: boolean): Promise<void> {
+  const table = kind === "alert" ? "alerts" : "inquiries";
   const { error } = await client().from(table).update({ handled }).eq("id", id);
   if (error) throw error;
 }

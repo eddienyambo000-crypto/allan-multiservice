@@ -26,9 +26,13 @@ export interface Listing {
   area_sqm?: number | null;
   furnished?: boolean | null;
 
-  // land
+  // land / property
   zoning?: string | null;
   title_status?: string | null;
+  tenure?: string | null; // Freehold | Leasehold (99yr)
+
+  // media
+  video_url?: string | null;
 
   // car
   make?: string | null;
@@ -53,6 +57,8 @@ export interface ListingFilters {
   sort?: "newest" | "price_asc" | "price_desc";
 }
 
+export type InquiryKind = "inquiry" | "video_tour" | "concierge";
+
 export interface Inquiry {
   name: string;
   phone: string;
@@ -60,12 +66,28 @@ export interface Inquiry {
   message?: string;
   listing_id?: string | null;
   listing_title?: string | null;
+  kind?: InquiryKind;
 }
 
-export interface SellerLead {
-  vertical: Vertical;
-  name: string;
-  phone: string;
-  asset_title: string;
-  details?: string;
+export interface Alert {
+  channel: "whatsapp" | "email";
+  contact: string;
+  vertical?: Vertical | null;
+  location?: string | null;
+  max_price?: number | null;
+}
+
+export interface SiteSettings {
+  logo_url: string | null;
+  hero_media_type: "gradient" | "image" | "video";
+  hero_media_url: string | null;
+  hero_poster_url: string | null;
+  hero_headline: string | null;
+  hero_subtext: string | null;
+  about_image_url: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  usd_rate: number | null;
+  rdb_line: string | null;
 }
