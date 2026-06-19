@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "placehold.co" },
       // Supabase Storage public bucket (any project ref)
       { protocol: "https", hostname: "*.supabase.co" },
+      // Cloudinary media CDN
+      { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
 };

@@ -1,5 +1,6 @@
 import { getBrowserSupabase } from "./supabase";
 import { DB, BUCKET } from "./site";
+import { cloudinaryConfigured, uploadToCloudinary } from "./cloudinary";
 import type { Listing, SiteSettings } from "./types";
 
 function client() {
@@ -35,8 +36,13 @@ export async function adminDelete(id: string): Promise<void> {
   if (error) throw error;
 }
 
-/** Upload an image/video to a public Storage bucket; returns its public URL. */
+/**
+ * Upload an image/video and return its public URL.
+ * Prefers Cloudinary (free ~25 GB + CDN) when configured; otherwise falls
+ * back to the Supabase Storage bucket — so it works either way.
+ */
 export async function adminUploadImage(file: File, bucket: string = BUCKET.media): Promise<string> {
+  if (cloudinaryConfigured) return uploadToCloudinary(file);
   const sb = client();
   const ext = file.name.split(".").pop() || "jpg";
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
