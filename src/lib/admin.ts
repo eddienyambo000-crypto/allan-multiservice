@@ -9,6 +9,15 @@ function client() {
   return sb;
 }
 
+/** Ask the server to refresh public caches so changes appear on the site now. */
+export async function triggerRevalidate(): Promise<void> {
+  try {
+    await fetch("/api/revalidate", { method: "POST" });
+  } catch {
+    /* non-fatal — time-based cache will catch up anyway */
+  }
+}
+
 export function slugify(s: string): string {
   return s
     .toLowerCase()

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { adminUpsert, adminUploadImage, slugify } from "@/lib/admin";
+import { adminUpsert, adminUploadImage, slugify, triggerRevalidate } from "@/lib/admin";
+import { compressImage } from "@/lib/image";
 import { VERTICALS, KIGALI_AREAS } from "@/lib/site";
 import type { Listing, Vertical, ListingType, ListingStatus } from "@/lib/types";
 
@@ -46,10 +47,14 @@ export default function ListingForm({
     setBusy(true);
     setErr("");
     try {
-      const urls: string[] = [];
-      for (const file of toAdd) urls.push(await adminUploadImage(file));
+      // Compress in the browser, then upload all in parallel — fast even on weak data.
+      const compressed = await Promise.all(toAdd.map((f) => compressImage(f)));
+      const results = await Promise.allSettled(compressed.map((f) => adminUploadImage(f)));
+      const urls = results.filter((r): r is PromiseFulfilledResult<string> => r.status === "fulfilled").map((r) => r.value);
+      const failed = results.length - urls.length;
       set("images", [...current, ...urls]);
-      if (Array.from(files).length > room) setErr(`Only the first ${room} were added — ${MAX_IMAGES} photo max.`);
+      if (failed > 0) setErr(`${failed} photo(s) didn't upload — check your connection and try those again.`);
+      else if (Array.from(files).length > room) setErr(`Only ${room} added — ${MAX_IMAGES} photo max.`);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Image upload failed.");
     } finally {
@@ -83,6 +88,7 @@ export default function ListingForm({
         location: f.location ?? "Kigali",
       };
       await adminUpsert(payload);
+      await triggerRevalidate();
       onSaved();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Save failed.");

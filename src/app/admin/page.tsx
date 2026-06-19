@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getBrowserSupabase, supabaseConfigured } from "@/lib/supabase";
-import { adminListAll, adminDelete, adminLeads, adminMarkLead, type LeadRow } from "@/lib/admin";
+import { adminListAll, adminDelete, adminLeads, adminMarkLead, triggerRevalidate, type LeadRow } from "@/lib/admin";
 import { VERTICAL_BY_DB } from "@/lib/site";
 import type { Listing } from "@/lib/types";
 import ListingForm from "@/components/admin/ListingForm";
@@ -129,6 +129,7 @@ function ListingsManager() {
   async function remove(id: string) {
     if (!confirm("Delete this listing? This cannot be undone.")) return;
     await adminDelete(id);
+    await triggerRevalidate();
     load();
   }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { adminGetSettings, adminSaveSettings, adminUploadImage } from "@/lib/admin";
+import { adminGetSettings, adminSaveSettings, adminUploadImage, triggerRevalidate } from "@/lib/admin";
 import { BUCKET } from "@/lib/site";
 import type { SiteSettings } from "@/lib/types";
 
@@ -31,7 +31,7 @@ export default function SettingsTab() {
 
   async function save() {
     setBusy(true); setErr(""); setMsg("");
-    try { await adminSaveSettings(s); setMsg("Saved! Changes appear on the site within a few minutes."); }
+    try { await adminSaveSettings(s); await triggerRevalidate(); setMsg("Saved! Your changes are live on the site now."); }
     catch (e) { setErr(e instanceof Error ? e.message : "Save failed."); }
     finally { setBusy(false); }
   }

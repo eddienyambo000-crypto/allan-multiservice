@@ -14,6 +14,10 @@ import {
   IconArrow, IconGlobe, IconStar,
 } from "@/components/icons";
 
+// Regenerate at most once a minute so new listings/settings surface even
+// without an explicit revalidation ping.
+export const revalidate = 60;
+
 const VERT_ICON: Record<VerticalKey, React.FC<{ className?: string }>> = {
   properties: IconHome,
   rentals: IconKey,
