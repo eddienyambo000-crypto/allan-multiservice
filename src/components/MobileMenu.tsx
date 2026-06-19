@@ -95,6 +95,7 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
           </Link>
 
           <div className="mt-4 flex flex-col gap-2 border-t border-[var(--color-line)] pt-4 text-[var(--color-ink-soft)]">
+            <Link href="/saved" onClick={onClose} className="flex items-center justify-between py-2 font-medium">Saved listings <IconArrow className="h-4 w-4 text-[var(--color-muted)]" /></Link>
             <Link href="/about" onClick={onClose} className="flex items-center justify-between py-2 font-medium">About <IconArrow className="h-4 w-4 text-[var(--color-muted)]" /></Link>
             <Link href="/contact" onClick={onClose} className="flex items-center justify-between py-2 font-medium">Contact <IconArrow className="h-4 w-4 text-[var(--color-muted)]" /></Link>
           </div>

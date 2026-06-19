@@ -57,6 +57,30 @@ export function useFavoriteCount() {
   return n;
 }
 
+/** Hook: the full list of favorited slugs (most-recent first). */
+export function useFavorites(): { slugs: string[]; ready: boolean } {
+  const [slugs, setSlugs] = useState<string[]>([]);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const sync = () => { setSlugs(read(KEY)); setReady(true); };
+    sync();
+    window.addEventListener("allan:fav-change", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("allan:fav-change", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  return { slugs, ready };
+}
+
+/** Hook: recently-viewed slugs (most-recent first). */
+export function useRecent(): string[] {
+  const [slugs, setSlugs] = useState<string[]>([]);
+  useEffect(() => { setSlugs(read(RECENT_KEY)); }, []);
+  return slugs;
+}
+
 export function pushRecent(slug: string) {
   if (typeof window === "undefined") return;
   const cur = read(RECENT_KEY).filter((s) => s !== slug);

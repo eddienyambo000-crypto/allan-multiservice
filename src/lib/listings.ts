@@ -27,7 +27,7 @@ const fetchAllCached = unstable_cache(
     return SEED_LISTINGS;
   },
   ["all-listings"],
-  { revalidate: 300, tags: ["listings"] }
+  { revalidate: 60, tags: ["listings"] }
 );
 
 function applyFilters(items: Listing[], f: ListingFilters): Listing[] {

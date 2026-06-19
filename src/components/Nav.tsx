@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { VERTICALS, SITE } from "@/lib/site";
 import { IconMenu, IconBell, IconGlobe } from "@/components/icons";
 import MobileMenu from "@/components/MobileMenu";
+import SavedNavLink from "@/components/SavedNavLink";
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -54,7 +55,8 @@ export default function Nav() {
             </Link>
           </div>
 
-          <div className="hidden items-center gap-3 lg:flex">
+          <div className="hidden items-center gap-4 lg:flex">
+            <SavedNavLink />
             <Link
               href="/#alerts"
               className="group inline-flex items-center gap-1.5 rounded-full bg-[var(--color-sky)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_22px_rgba(12,140,224,0.32)] transition-[transform,background] duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-sky-hover)] active:translate-y-0"
@@ -63,13 +65,16 @@ export default function Nav() {
             </Link>
           </div>
 
-          <button
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-[var(--color-line)] bg-white/70 text-[var(--color-ink)] backdrop-blur transition-colors hover:bg-[var(--color-surface)] lg:hidden"
-          >
-            <IconMenu />
-          </button>
+          <div className="flex items-center gap-3 lg:hidden">
+            <SavedNavLink />
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="Open menu"
+              className="grid h-10 w-10 place-items-center rounded-xl border border-[var(--color-line)] bg-white/70 text-[var(--color-ink)] backdrop-blur transition-colors hover:bg-[var(--color-surface)]"
+            >
+              <IconMenu />
+            </button>
+          </div>
         </nav>
       </header>
 
