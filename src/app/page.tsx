@@ -86,7 +86,7 @@ export default async function Home() {
       </section>
 
       {/* ── WHY ALLAN / RISK REVERSAL ── */}
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-surface)] py-20">
+      <section className="border-y border-[color-mix(in_srgb,var(--color-sky)_22%,transparent)] bg-[var(--color-sky-soft)] py-20">
         <div className="container-x">
           <Reveal className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Why Allan</p>
@@ -140,7 +140,7 @@ export default async function Home() {
       </section>
 
       {/* ── ALERTS (lead magnet) ── */}
-      <section id="alerts" className="scroll-mt-24 border-y border-[var(--color-line)] bg-[var(--color-surface)] py-20">
+      <section id="alerts" className="scroll-mt-24 border-y border-[color-mix(in_srgb,var(--color-pink)_30%,transparent)] bg-[var(--color-pink-soft)] py-20">
         <div className="container-x grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
           <Reveal>
             <p className="eyebrow">Be first</p>
@@ -179,7 +179,7 @@ export default async function Home() {
 
       {/* ── TESTIMONIALS (admin-approved; hidden until real reviews exist) ── */}
       {testimonials.length > 0 && (
-        <section className="border-y border-[var(--color-line)] bg-[var(--color-surface)] py-20">
+        <section className="border-y border-[color-mix(in_srgb,var(--color-sky)_22%,transparent)] bg-[var(--color-sky-soft)] py-20">
           <div className="container-x">
             <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-4 text-center sm:text-left">
               <div>
@@ -234,14 +234,17 @@ export default async function Home() {
 
       {/* ── FINAL CTA ── */}
       <section className="container-x pb-24">
-        <Reveal className="flex flex-col items-center gap-5 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-surface)] px-6 py-14 text-center">
-          <h2 className="max-w-xl text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold">Ready to find your place in Rwanda?</h2>
-          <p className="max-w-md text-[var(--color-ink-soft)]">Talk to the {SITE.shortName} team. We reply to every message, usually within the hour.</p>
+        <Reveal
+          className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[28px] px-6 py-16 text-center"
+          style={{ background: "linear-gradient(115deg, var(--color-sky) 0%, #1466C9 48%, var(--color-pink) 128%)" }}
+        >
+          <h2 className="max-w-xl text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold text-white">Ready to find your place in Rwanda?</h2>
+          <p className="max-w-md text-white/85">Talk to the {SITE.shortName} team. We reply to every message, usually within the hour.</p>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-[var(--color-sky)] px-7 py-3.5 text-sm font-semibold text-white transition-[transform,background] duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-sky-hover)]">
+            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-ink)] shadow-lg transition-transform duration-200 hover:-translate-y-0.5">
               Contact us <IconArrow className="h-4 w-4" />
             </Link>
-            <a href={`tel:${SITE.phone}`} className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-sky)]">
+            <a href={`tel:${SITE.phone}`} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10">
               Call {SITE.phoneDisplay}
             </a>
           </div>

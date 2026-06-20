@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 export default function Reveal({
   children,
   delay = 0,
   className = "",
   as: Tag = "div",
+  style,
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
   as?: "div" | "section" | "li" | "article";
+  style?: CSSProperties;
 }) {
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
@@ -42,7 +44,7 @@ export default function Reveal({
     <Comp
       ref={ref as React.Ref<HTMLDivElement>}
       className={`reveal ${shown ? "in" : ""} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{ ...style, transitionDelay: `${delay}ms` }}
     >
       {children}
     </Comp>

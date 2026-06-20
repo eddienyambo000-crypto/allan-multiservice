@@ -59,7 +59,7 @@ export default function Nav() {
             <SavedNavLink />
             <Link
               href="/#alerts"
-              className="group inline-flex items-center gap-1.5 rounded-full bg-[var(--color-sky)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_22px_rgba(12,140,224,0.32)] transition-[transform,background] duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-sky-hover)] active:translate-y-0"
+              className="group inline-flex items-center gap-1.5 rounded-full bg-[var(--color-pink)] px-5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-pink)] transition-[transform,background] duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-pink-hover)] active:translate-y-0"
             >
               <IconBell className="h-4 w-4" /> Get listing alerts
             </Link>
