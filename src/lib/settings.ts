@@ -1,6 +1,7 @@
 import { getSupabase } from "./supabase";
 import { SITE, DB } from "./site";
 import { DEFAULT_USD_RATE } from "./money";
+import { getLiveUsdRate } from "./fxrate";
 import type { SiteSettings } from "./types";
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -55,7 +56,6 @@ export function usdRate(s: SiteSettings): number {
  * admin-set rate, otherwise the default. Keeps USD figures current automatically.
  */
 export async function getRate(s: SiteSettings): Promise<number> {
-  const { getLiveUsdRate } = await import("./fxrate");
   const live = await getLiveUsdRate();
   return live ?? usdRate(s);
 }

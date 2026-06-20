@@ -19,6 +19,8 @@ export interface Listing {
   status: ListingStatus;
   featured: boolean;
   created_at: string;
+  updated_at?: string | null;
+  deleted_at?: string | null;
 
   // property / rental
   bedrooms?: number | null;

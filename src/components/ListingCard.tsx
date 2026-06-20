@@ -4,6 +4,7 @@ import type { Listing } from "@/lib/types";
 import { VERTICAL_BY_DB } from "@/lib/site";
 import { specChips, STATUS_LABEL } from "@/lib/format";
 import { DEFAULT_USD_RATE } from "@/lib/money";
+import { cld } from "@/lib/img";
 import { IconPin, IconVideo } from "@/components/icons";
 import FavoriteButton from "@/components/FavoriteButton";
 import PriceTag from "@/components/PriceTag";
@@ -27,7 +28,7 @@ export default function ListingCard({ listing, usdRate = DEFAULT_USD_RATE }: { l
         <Link href={href} className="block h-full w-full" aria-label={listing.title}>
           {listing.images[0] ? (
             <Image
-              src={listing.images[0]}
+              src={cld(listing.images[0], 800)}
               alt={listing.title}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

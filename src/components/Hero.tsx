@@ -19,28 +19,29 @@ export default function Hero({ settings }: { settings: SiteSettings }) {
     <section className="relative isolate overflow-hidden">
       {/* Background layer */}
       <div aria-hidden className="absolute inset-0 -z-20">
+        {/* Gradient base always present — also the reduced-motion fallback behind video */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 120% at 0% 0%, #1AA0F0 0%, #0C8CE0 38%, #0A6FC0 70%, #064E8C 100%)",
+          }}
+        />
         {type === "video" && settings.hero_media_url ? (
           <video
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
             autoPlay
             muted
             loop
             playsInline
+            preload="metadata"
             poster={settings.hero_poster_url ?? undefined}
           >
             <source src={settings.hero_media_url} />
           </video>
         ) : type === "image" && settings.hero_media_url ? (
           <Image src={settings.hero_media_url} alt="" fill priority className="object-cover" sizes="100vw" />
-        ) : (
-          <div
-            className="h-full w-full"
-            style={{
-              background:
-                "radial-gradient(120% 120% at 0% 0%, #1AA0F0 0%, #0C8CE0 38%, #0A6FC0 70%, #064E8C 100%)",
-            }}
-          />
-        )}
+        ) : null}
       </div>
 
       {/* Legibility + brand overlay */}

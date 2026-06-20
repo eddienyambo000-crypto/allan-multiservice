@@ -76,9 +76,10 @@ export default function ListingForm({
     setErr("");
     try {
       const price = Number(f.price) || 0;
+      // Always derive the label from the current price + type so editing the
+      // price never leaves a stale label behind.
       const priceLabel =
-        f.price_label?.trim() ||
-        `${f.currency} ${price.toLocaleString("en-US")}${f.listing_type === "rent" ? " / month" : ""}`;
+        `${f.currency || "RWF"} ${price.toLocaleString("en-US")}${f.listing_type === "rent" ? " / month" : ""}`;
       const payload: Partial<Listing> = {
         ...f,
         price,

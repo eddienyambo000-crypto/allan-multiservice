@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { VERTICALS, SITE, waLink, type VerticalKey } from "@/lib/site";
+import { VERTICALS, SITE, type VerticalKey } from "@/lib/site";
+import { useSettings } from "@/components/SettingsProvider";
 import {
   IconClose, IconArrow, IconHome, IconKey, IconMap, IconCar,
   IconPhone, IconWhatsApp, IconGlobe, IconBell,
@@ -16,6 +17,7 @@ const VERT_ICON: Record<VerticalKey, React.FC<{ className?: string }>> = {
 };
 
 export default function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { wa, phone: ownerPhone } = useSettings();
   // Lock body scroll while open.
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -109,10 +111,10 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
             <IconBell className="h-4 w-4" /> Get new-listing alerts
           </Link>
           <div className="mt-3 grid grid-cols-2 gap-3">
-            <a href={`tel:${SITE.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--color-line)] px-4 py-3 text-sm font-semibold text-[var(--color-ink)]">
+            <a href={`tel:${ownerPhone}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--color-line)] px-4 py-3 text-sm font-semibold text-[var(--color-ink)]">
               <IconPhone className="h-4 w-4 text-[var(--color-sky)]" /> Call
             </a>
-            <a href={waLink(`Hi ${SITE.shortName}, I'd like to ask about a listing.`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white">
+            <a href={wa(`Hi ${SITE.shortName}, I'd like to ask about a listing.`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white">
               <IconWhatsApp className="h-4 w-4" /> WhatsApp
             </a>
           </div>

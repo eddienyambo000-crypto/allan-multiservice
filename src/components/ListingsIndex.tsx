@@ -5,7 +5,7 @@ import { parseFilters, type RawParams } from "@/lib/params";
 import { VERTICAL_BY_DB } from "@/lib/site";
 import { FEATURED_LOCATIONS } from "@/lib/locations";
 import type { Vertical } from "@/lib/types";
-import ListingCard from "@/components/ListingCard";
+import ListingGrid from "@/components/ListingGrid";
 import FilterBar from "@/components/FilterBar";
 import Reveal from "@/components/Reveal";
 import BuyerConciergeForm from "@/components/BuyerConciergeForm";
@@ -49,13 +49,7 @@ export default async function ListingsIndex({
       </p>
 
       {listings.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {listings.map((l, i) => (
-            <Reveal key={l.id} delay={(i % 3) * 60} as="article">
-              <ListingCard listing={l} usdRate={rate} />
-            </Reveal>
-          ))}
-        </div>
+        <ListingGrid listings={listings} usdRate={rate} />
       ) : (
         <div className="grid items-center gap-6 rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] bg-[var(--color-surface)] p-6 sm:p-10 lg:grid-cols-[1fr_1fr]">
           <div>

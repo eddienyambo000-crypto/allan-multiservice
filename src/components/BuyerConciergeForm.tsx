@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { submitInquiry } from "@/lib/leads";
 import { SITE, waLink } from "@/lib/site";
+import { useHoneypot } from "@/components/useHoneypot";
 import { IconCheck, IconSearch } from "@/components/icons";
 
 /** Buyer concierge — "tell us what you want, we hunt it down free". */
@@ -11,9 +12,11 @@ export default function BuyerConciergeForm() {
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
+  const { field: honeypot, human } = useHoneypot();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!human()) { setState("done"); return; }
     setState("sending");
     await submitInquiry({ name, phone, message, kind: "concierge" });
     setState("done");
@@ -32,6 +35,7 @@ export default function BuyerConciergeForm() {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-7">
+      {honeypot}
       <div className="grid gap-3 sm:grid-cols-2">
         <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className={inputCls} />
         <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+250 7XX XXX XXX" className={inputCls} />

@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { getSupabase } from "./supabase";
+import { getSupabase, supabaseConfigured } from "./supabase";
 import { SEED_LISTINGS } from "./seed";
 import { DB } from "./site";
 import type { Listing, ListingFilters, Vertical } from "./types";
@@ -14,17 +14,22 @@ const TABLE = DB.listings;
  */
 const fetchAllCached = unstable_cache(
   async (): Promise<Listing[]> => {
+    // Demo seed ONLY when Supabase isn't configured (e.g. local dev with no env).
+    // In production we never silently show fake data on a transient DB error.
+    if (!supabaseConfigured) return SEED_LISTINGS;
     const sb = getSupabase();
-    if (sb) {
-      try {
-        const { data, error } = await sb.from(TABLE).select("*").order("created_at", { ascending: false });
-        if (error) throw error;
-        if (data && data.length) return data as Listing[];
-      } catch {
-        /* fall through to seed */
-      }
+    if (!sb) return SEED_LISTINGS;
+    try {
+      const { data, error } = await sb
+        .from(TABLE)
+        .select("*")
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Listing[];
+    } catch {
+      return []; // configured but errored → empty, never demo villas
     }
-    return SEED_LISTINGS;
   },
   ["all-listings"],
   { revalidate: 60, tags: ["listings"] }
@@ -79,9 +84,9 @@ export async function getRelated(listing: Listing, limit = 3): Promise<Listing[]
   return all.filter((l) => l.vertical === listing.vertical && l.slug !== listing.slug).slice(0, limit);
 }
 
-export async function getAllSlugs(): Promise<{ slug: string; vertical: Vertical; created_at: string }[]> {
+export async function getAllSlugs(): Promise<{ slug: string; vertical: Vertical; created_at: string; updated_at?: string | null }[]> {
   const all = await fetchAllCached();
-  return all.map((l) => ({ slug: l.slug, vertical: l.vertical, created_at: l.created_at }));
+  return all.map((l) => ({ slug: l.slug, vertical: l.vertical, created_at: l.created_at, updated_at: (l as { updated_at?: string }).updated_at }));
 }
 
 export async function getCounts(): Promise<Record<Vertical, number>> {

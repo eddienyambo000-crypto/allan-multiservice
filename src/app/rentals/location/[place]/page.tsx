@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FEATURED_LOCATIONS, locationFromSlug } from "@/lib/locations";
+import { getListings } from "@/lib/listings";
 import LocationLanding from "@/components/LocationLanding";
 
 export const revalidate = 600;
@@ -14,10 +15,12 @@ export async function generateMetadata({ params }: { params: Promise<{ place: st
   const { place } = await params;
   const loc = locationFromSlug(place);
   if (!loc) return { title: "Location not found" };
+  const count = (await getListings({ vertical: "rental", location: loc.name })).length;
   return {
     title: `Houses & Apartments for Rent in ${loc.name}, Rwanda`,
     description: `Verified houses and apartments for rent in ${loc.name} (${loc.region}) — furnished and unfurnished, every budget. Allan Multiservice Group.`,
     alternates: { canonical: `/rentals/location/${loc.slug}` },
+    robots: count > 0 ? undefined : { index: false, follow: true },
   };
 }
 

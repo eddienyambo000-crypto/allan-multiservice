@@ -53,17 +53,35 @@ html {
 }
 
 body {
-  /* Soft sky/pink-tinted base so white recedes (60 sky · 30 white · 10 pink) */
+  /* Clearly sky-blue base so white recedes to cards only (60 sky · 30 white · 10 pink) */
   background:
-    radial-gradient(110% 55% at 100% 0%, var(--color-pink-soft) 0%, transparent 40%),
-    linear-gradient(180deg, #E6F2FC 0%, #EBF4FD 45%, #FBEFF4 100%);
+    radial-gradient(120% 50% at 100% 0%, rgba(255, 77, 141, 0.12) 0%, transparent 46%),
+    linear-gradient(180deg, #CFE3F7 0%, #D8E8F8 30%, #DCEAF6 60%, #F3E6EE 100%);
   background-repeat: no-repeat;
-  background-size: 100% 100vh, 100% 100%;
+  background-size: 100% 140vh, 100% 100%;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* ── Color bands (reusable) ── */
+.band-sky {
+  position: relative;
+  background: linear-gradient(135deg, #0C8CE0 0%, #0A6FC0 55%, #064E8C 120%);
+  color: #fff;
+}
+.band-sky :where(h1, h2, h3, p, span, a, li, dt, dd, blockquote, figcaption) { color: inherit; }
+.band-sky .eyebrow { color: #BFE3FF; }
+.band-pink {
+  background: linear-gradient(135deg, var(--color-pink-soft) 0%, #FFD3E4 100%);
+}
+/* Tinted page-header strip behind inner-page H1s so they aren't white-on-white */
+.page-header-tint {
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(255, 77, 141, 0.10) 0%, transparent 50%),
+    linear-gradient(180deg, var(--color-sky-soft) 0%, transparent 100%);
 }
 
 h1, h2, h3, h4, h5 {

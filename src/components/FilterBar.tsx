@@ -38,7 +38,7 @@ export default function FilterBar({ vertical }: { vertical: Vertical }) {
       if (value) next.set(key, value);
       else next.delete(key);
       const qs = next.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
     [params, pathname, router]
   );
@@ -98,7 +98,7 @@ export default function FilterBar({ vertical }: { vertical: Vertical }) {
 
         {hasFilters && (
           <button
-            onClick={() => router.push(pathname, { scroll: false })}
+            onClick={() => router.replace(pathname, { scroll: false })}
             className="inline-flex items-center gap-1 rounded-full border border-[var(--color-line)] px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition-colors hover:border-[var(--color-pink)] hover:text-[var(--color-pink)]"
           >
             <IconClose className="h-3.5 w-3.5" /> Clear

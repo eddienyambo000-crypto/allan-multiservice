@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
+import { SettingsProvider } from "@/components/SettingsProvider";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -52,19 +54,33 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const s = await getSettings();
+  const publicSettings = {
+    phone: s.phone ?? SITE.phone,
+    whatsapp: s.whatsapp ?? SITE.whatsapp,
+    email: s.email ?? SITE.email,
+  };
   return (
     <html
       lang="en"
       className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrains.variable}`}
     >
       <body className="min-h-dvh flex flex-col">
-        <Nav />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <WhatsAppFloat />
+        <SettingsProvider value={publicSettings}>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-lg focus:bg-[var(--color-sky)] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+          >
+            Skip to content
+          </a>
+          <Nav />
+          <main id="main" className="flex-1">{children}</main>
+          <Footer />
+          <WhatsAppFloat />
+        </SettingsProvider>
       </body>
     </html>
   );

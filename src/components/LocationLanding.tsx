@@ -4,8 +4,7 @@ import { getSettings, getRate } from "@/lib/settings";
 import { VERTICAL_BY_DB, SITE } from "@/lib/site";
 import { FEATURED_LOCATIONS, type RwLocation } from "@/lib/locations";
 import type { Vertical } from "@/lib/types";
-import ListingCard from "@/components/ListingCard";
-import Reveal from "@/components/Reveal";
+import ListingGrid from "@/components/ListingGrid";
 import BuyerConciergeForm from "@/components/BuyerConciergeForm";
 import { IconArrow, IconPin } from "@/components/icons";
 
@@ -45,13 +44,7 @@ export default async function LocationLanding({
       </header>
 
       {listings.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {listings.map((l, i) => (
-            <Reveal key={l.id} delay={(i % 3) * 60} as="article">
-              <ListingCard listing={l} usdRate={rate} />
-            </Reveal>
-          ))}
-        </div>
+        <ListingGrid listings={listings} usdRate={rate} />
       ) : (
         <div className="grid items-center gap-6 rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] bg-[var(--color-surface)] p-6 sm:p-10 lg:grid-cols-[1fr_1fr]">
           <div>

@@ -1,15 +1,28 @@
 import { revalidatePath, revalidateTag } from "next/cache";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 /**
- * Called by the admin after a listing/settings change so updates appear on the
- * live site immediately instead of waiting for the time-based cache. Revalidation
- * only refreshes caches — it's not destructive — so it's safe to call openly.
+ * Refreshes public caches after an admin change. Rejects anonymous callers:
+ * requires a valid Supabase session token (the admin's), so randoms can't spam it.
+ * Revalidation only refreshes caches — never destructive.
  */
-export async function POST() {
-  // Bust the unstable_cache "listings" data tag (single-arg legacy call).
+export async function POST(req: NextRequest) {
+  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (!token || !url || !anon) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const sb = createClient(url, anon, { auth: { persistSession: false } });
+  const { data, error } = await sb.auth.getUser(token);
+  if (error || !data.user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   (revalidateTag as unknown as (tag: string) => void)("listings");
-  // Refresh every page under the root layout.
+  (revalidateTag as unknown as (tag: string) => void)("testimonials");
   revalidatePath("/", "layout");
   return NextResponse.json({ revalidated: true, now: Date.now() });
 }

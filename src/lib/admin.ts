@@ -9,10 +9,16 @@ function client() {
   return sb;
 }
 
-/** Ask the server to refresh public caches so changes appear on the site now. */
+/** Ask the server to refresh public caches so changes appear on the site now.
+ *  Sends the admin's access token so the endpoint can reject anonymous callers. */
 export async function triggerRevalidate(): Promise<void> {
   try {
-    await fetch("/api/revalidate", { method: "POST" });
+    const sb = getBrowserSupabase();
+    const token = sb ? (await sb.auth.getSession()).data.session?.access_token : null;
+    await fetch("/api/revalidate", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
   } catch {
     /* non-fatal — time-based cache will catch up anyway */
   }
@@ -30,17 +36,45 @@ export function slugify(s: string): string {
 
 /* ── Listings ── */
 export async function adminListAll(): Promise<Listing[]> {
+  // Includes soft-deleted rows (admin RLS allows it) so the Trash works.
   const { data, error } = await client().from(DB.listings).select("*").order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Listing[];
 }
 
+/** Ensure the slug is unique by appending -2, -3, … if needed. */
+async function uniqueSlug(base: string, currentId?: string): Promise<string> {
+  const sb = client();
+  const slug = base || "listing";
+  for (let n = 1; n < 50; n++) {
+    const candidate = n === 1 ? slug : `${slug}-${n}`;
+    const { data, error } = await sb.from(DB.listings).select("id").eq("slug", candidate).maybeSingle();
+    if (error) throw error;
+    if (!data || data.id === currentId) return candidate;
+  }
+  return `${slug}-${Date.now()}`;
+}
+
 export async function adminUpsert(listing: Partial<Listing>): Promise<void> {
-  const { error } = await client().from(DB.listings).upsert(listing, { onConflict: "id" });
+  const payload = { ...listing, updated_at: new Date().toISOString() };
+  if (payload.slug) payload.slug = await uniqueSlug(payload.slug, payload.id);
+  const { error } = await client().from(DB.listings).upsert(payload, { onConflict: "id" });
   if (error) throw error;
 }
 
+/** Soft delete — moves to Trash (recoverable), not gone forever. */
 export async function adminDelete(id: string): Promise<void> {
+  const { error } = await client().from(DB.listings).update({ deleted_at: new Date().toISOString() }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function adminRestore(id: string): Promise<void> {
+  const { error } = await client().from(DB.listings).update({ deleted_at: null }).eq("id", id);
+  if (error) throw error;
+}
+
+/** Permanent delete — only from Trash, with confirmation in the UI. */
+export async function adminHardDelete(id: string): Promise<void> {
   const { error } = await client().from(DB.listings).delete().eq("id", id);
   if (error) throw error;
 }

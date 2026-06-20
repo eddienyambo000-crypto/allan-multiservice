@@ -86,12 +86,12 @@ export default async function Home() {
       </section>
 
       {/* ── WHY ALLAN / RISK REVERSAL ── */}
-      <section className="border-y border-[color-mix(in_srgb,var(--color-sky)_22%,transparent)] bg-[var(--color-sky-soft)] py-20">
+      <section className="band-sky py-20">
         <div className="container-x">
           <Reveal className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Why Allan</p>
             <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] font-bold">The marketplace that removes the risk</h2>
-            <p className="mt-4 text-[var(--color-ink-soft)]">
+            <p className="mt-4 text-white/85">
               Most listings in Rwanda are guesswork — wrong prices, fake photos, missing papers. We fixed that.
             </p>
           </Reveal>

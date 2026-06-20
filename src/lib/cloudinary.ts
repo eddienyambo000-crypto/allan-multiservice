@@ -13,8 +13,17 @@ export const cloudinaryConfigured = Boolean(CLOUD && PRESET);
  * Retries a few times so a dropped packet on a weak connection doesn't fail
  * the whole upload.
  */
+const MAX_BYTES = 100 * 1024 * 1024; // 100 MB (matches Cloudinary plan cap)
+
 export async function uploadToCloudinary(file: File, attempts = 3): Promise<string> {
   if (!CLOUD || !PRESET) throw new Error("Cloudinary is not configured.");
+  // Only allow real media — never arbitrary files onto the public CDN.
+  if (!/^(image|video)\//.test(file.type)) {
+    throw new Error("Only image or video files are allowed.");
+  }
+  if (file.size > MAX_BYTES) {
+    throw new Error("File is too large (max 100 MB).");
+  }
   let lastErr: unknown;
   for (let i = 0; i < attempts; i++) {
     try {

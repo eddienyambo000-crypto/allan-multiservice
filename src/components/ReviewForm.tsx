@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { submitTestimonial } from "@/lib/testimonials";
+import { useHoneypot } from "@/components/useHoneypot";
+import { SITE, waLink } from "@/lib/site";
 import { IconStar, IconCheck } from "@/components/icons";
 
 export default function ReviewForm() {
@@ -10,13 +12,15 @@ export default function ReviewForm() {
   const [quote, setQuote] = useState("");
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
-  const [state, setState] = useState<"idle" | "sending" | "done">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const { field: honeypot, human } = useHoneypot();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!human()) { setState("done"); return; }
     setState("sending");
-    await submitTestimonial({ name, role, quote, rating });
-    setState("done");
+    const res = await submitTestimonial({ name, role, quote, rating });
+    setState(res.ok ? "done" : "error");
   }
 
   if (state === "done") {
@@ -29,8 +33,22 @@ export default function ReviewForm() {
     );
   }
 
+  if (state === "error") {
+    return (
+      <div className="rounded-[var(--radius-card)] border border-red-200 bg-red-50 p-8 text-center" role="alert">
+        <h2 className="text-xl font-bold text-red-700">That didn&apos;t send</h2>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-red-600">
+          Please try again, or send it to us on{" "}
+          <a className="font-semibold underline" target="_blank" rel="noopener" href={waLink(`Hi ${SITE.shortName}, here's my review: ${quote} — ${name}`)}>WhatsApp</a>.
+        </p>
+        <button onClick={() => setState("idle")} className="mt-4 rounded-full border border-red-300 px-5 py-2 text-sm font-semibold text-red-700">Try again</button>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8">
+      {honeypot}
       <div>
         <p className="mb-2 font-[family-name:var(--font-mono)] text-[0.6rem] uppercase tracking-wider text-[var(--color-muted)]">Your rating</p>
         <div className="flex gap-1">

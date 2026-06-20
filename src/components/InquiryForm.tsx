@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { submitInquiry } from "@/lib/leads";
-import { SITE, waLink } from "@/lib/site";
+import { SITE } from "@/lib/site";
+import { useSettings } from "@/components/SettingsProvider";
 import { compactUSD, formatUSD } from "@/lib/money";
 import type { Listing } from "@/lib/types";
+import { useHoneypot } from "@/components/useHoneypot";
 import { IconWhatsApp, IconPhone, IconVideo } from "@/components/icons";
 
 export default function InquiryForm({
@@ -18,12 +20,15 @@ export default function InquiryForm({
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState(`Hi ${SITE.shortName}, I'm interested in "${listing.title}". Is it still available?`);
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
+  const { field: honeypot, human } = useHoneypot();
+  const { wa, phone: ownerPhone } = useSettings();
 
   async function send(kind: "inquiry" | "video_tour", waMessage: string) {
+    if (!human()) { setState("done"); return; }
     setState("sending");
     await submitInquiry({ name, phone, message: waMessage, listing_id: listing.id, listing_title: listing.title, kind });
     setState("done");
-    window.open(waLink(waMessage), "_blank", "noopener");
+    window.open(wa(waMessage), "_blank", "noopener");
   }
 
   return (
@@ -35,6 +40,7 @@ export default function InquiryForm({
       </p>
 
       <form onSubmit={(e) => { e.preventDefault(); send("inquiry", message); }} className="mt-5 flex flex-col gap-3">
+        {honeypot}
         <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className={inputCls} />
         <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (+250 7XX XXX XXX)" className={inputCls} />
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} className={`${inputCls} resize-none`} />
@@ -55,7 +61,7 @@ export default function InquiryForm({
         <IconVideo className="h-4 w-4" /> Request a video tour
       </button>
 
-      <a href={`tel:${SITE.phone}`} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-line)] px-5 py-3 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-sky)]">
+      <a href={`tel:${ownerPhone}`} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-line)] px-5 py-3 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-sky)]">
         <IconPhone className="h-4 w-4 text-[var(--color-sky)]" /> Call {SITE.phoneDisplay}
       </a>
 

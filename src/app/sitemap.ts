@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const slugs = await getAllSlugs();
   const listingPages: MetadataRoute.Sitemap = slugs.map((s) => ({
     url: `${base}${VERTICAL_BY_DB[s.vertical].href}/${s.slug}`,
-    lastModified: s.created_at ? new Date(s.created_at) : now,
+    lastModified: s.updated_at ? new Date(s.updated_at) : s.created_at ? new Date(s.created_at) : now,
     changeFrequency: "weekly",
     priority: 0.8,
   }));

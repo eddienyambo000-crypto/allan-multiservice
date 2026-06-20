@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FEATURED_LOCATIONS, locationFromSlug } from "@/lib/locations";
+import { getListings } from "@/lib/listings";
 import LocationLanding from "@/components/LocationLanding";
 
 export const revalidate = 600;
@@ -14,10 +15,13 @@ export async function generateMetadata({ params }: { params: Promise<{ place: st
   const { place } = await params;
   const loc = locationFromSlug(place);
   if (!loc) return { title: "Location not found" };
+  // Don't let empty location pages get indexed (avoids doorway-page penalty).
+  const count = (await getListings({ vertical: "property", location: loc.name })).length;
   return {
     title: `Houses & Property for Sale in ${loc.name}, Rwanda`,
     description: `Verified houses, villas and apartments for sale in ${loc.name} (${loc.region}). Real prices in RWF & USD, clear titles — Allan Multiservice Group.`,
     alternates: { canonical: `/properties/location/${loc.slug}` },
+    robots: count > 0 ? undefined : { index: false, follow: true },
   };
 }
 

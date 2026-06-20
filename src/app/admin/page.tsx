@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getBrowserSupabase, supabaseConfigured } from "@/lib/supabase";
-import { adminListAll, adminDelete, adminLeads, adminMarkLead, triggerRevalidate, type LeadRow } from "@/lib/admin";
+import { adminListAll, adminDelete, adminRestore, adminHardDelete, adminLeads, adminMarkLead, triggerRevalidate, type LeadRow } from "@/lib/admin";
 import { VERTICAL_BY_DB } from "@/lib/site";
 import type { Listing } from "@/lib/types";
 import ListingForm from "@/components/admin/ListingForm";
 import SettingsTab from "@/components/admin/SettingsTab";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -118,6 +119,7 @@ function ListingsManager() {
   const [editing, setEditing] = useState<Listing | "new" | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true); setErr("");
@@ -127,11 +129,9 @@ function ListingsManager() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  async function remove(id: string) {
-    if (!confirm("Delete this listing? This cannot be undone.")) return;
-    await adminDelete(id);
-    await triggerRevalidate();
-    load();
+  async function act(fn: () => Promise<void>) {
+    try { await fn(); await triggerRevalidate(); load(); }
+    catch (e) { setErr(e instanceof Error ? e.message : "Action failed."); }
   }
 
   if (editing) {
@@ -147,10 +147,13 @@ function ListingsManager() {
     );
   }
 
+  const active = items.filter((l) => !l.deleted_at);
+  const trashed = items.filter((l) => l.deleted_at);
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-[var(--color-muted)]">{items.length} listings</p>
+        <p className="text-sm text-[var(--color-muted)]">{active.length} live{trashed.length ? ` · ${trashed.length} in trash` : ""}</p>
         <button onClick={() => setEditing("new")} className="rounded-full bg-[var(--color-pink)] px-5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-pink)] transition-transform hover:-translate-y-0.5">
           + New listing
         </button>
@@ -159,23 +162,52 @@ function ListingsManager() {
       {loading ? (
         <Centered>Loading listings…</Centered>
       ) : (
-        <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white">
-          {items.map((l) => (
-            <div key={l.id} className="flex items-center justify-between gap-4 border-b border-[var(--color-line)] px-4 py-3 last:border-0">
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-[var(--color-ink)]">{l.title}</p>
-                <p className="text-xs text-[var(--color-muted)]">
-                  {VERTICAL_BY_DB[l.vertical]?.short} · {l.location} · {l.price_label} · {l.status}{l.featured ? " · ★" : ""}
-                </p>
+        <>
+          <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white">
+            {active.map((l) => (
+              <div key={l.id} className="flex items-center justify-between gap-4 border-b border-[var(--color-line)] px-4 py-3 last:border-0">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-[var(--color-ink)]">{l.title}</p>
+                  <p className="text-xs text-[var(--color-muted)]">
+                    {VERTICAL_BY_DB[l.vertical]?.short} · {l.location} · {l.price_label} · {l.status}{l.featured ? " · ★" : ""}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button onClick={() => setEditing(l)} className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-semibold text-[var(--color-ink)] hover:border-[var(--color-sky)]">Edit</button>
+                  <button onClick={() => act(() => adminDelete(l.id))} className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-semibold text-red-500 hover:border-red-400">Delete</button>
+                </div>
               </div>
-              <div className="flex shrink-0 gap-2">
-                <button onClick={() => setEditing(l)} className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-semibold text-[var(--color-ink)] hover:border-[var(--color-sky)]">Edit</button>
-                <button onClick={() => remove(l.id)} className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-semibold text-red-500 hover:border-red-400">Delete</button>
+            ))}
+            {active.length === 0 && <p className="px-4 py-8 text-center text-sm text-[var(--color-muted)]">No live listings. Add your first one.</p>}
+          </div>
+
+          {trashed.length > 0 && (
+            <div className="mt-6">
+              <p className="mb-2 font-[family-name:var(--font-mono)] text-[0.6rem] uppercase tracking-wider text-[var(--color-muted)]">Trash (recoverable)</p>
+              <div className="overflow-hidden rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] bg-[var(--color-surface)]">
+                {trashed.map((l) => (
+                  <div key={l.id} className="flex items-center justify-between gap-4 border-b border-[var(--color-line)] px-4 py-3 last:border-0">
+                    <p className="min-w-0 truncate text-sm text-[var(--color-muted)] line-through">{l.title}</p>
+                    <div className="flex shrink-0 gap-2">
+                      <button onClick={() => act(() => adminRestore(l.id))} className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-semibold text-[var(--color-sky)] hover:border-[var(--color-sky)]">Restore</button>
+                      <button onClick={() => setConfirmId(l.id)} className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-semibold text-red-500 hover:border-red-400">Delete forever</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-          {items.length === 0 && <p className="px-4 py-8 text-center text-sm text-[var(--color-muted)]">No listings yet. Add your first one.</p>}
-        </div>
+          )}
+        </>
+      )}
+
+      {confirmId && (
+        <ConfirmModal
+          title="Delete forever?"
+          body="This permanently removes the listing. This cannot be undone."
+          confirmLabel="Delete forever"
+          onConfirm={() => { const id = confirmId; setConfirmId(null); act(() => adminHardDelete(id)); }}
+          onCancel={() => setConfirmId(null)}
+        />
       )}
     </div>
   );

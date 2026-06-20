@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FEATURED_LOCATIONS, locationFromSlug } from "@/lib/locations";
+import { getListings } from "@/lib/listings";
 import LocationLanding from "@/components/LocationLanding";
 
 export const revalidate = 600;
@@ -14,10 +15,12 @@ export async function generateMetadata({ params }: { params: Promise<{ place: st
   const { place } = await params;
   const loc = locationFromSlug(place);
   if (!loc) return { title: "Location not found" };
+  const count = (await getListings({ vertical: "car", location: loc.name })).length;
   return {
     title: `Cars for Sale in ${loc.name}, Rwanda`,
     description: `Inspected cars for sale in ${loc.name} (${loc.region}) — make, model, year and mileage upfront, prices in RWF & USD. Allan Multiservice Group.`,
     alternates: { canonical: `/cars/location/${loc.slug}` },
+    robots: count > 0 ? undefined : { index: false, follow: true },
   };
 }
 

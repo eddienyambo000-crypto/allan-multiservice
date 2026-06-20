@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { submitInquiry } from "@/lib/leads";
 import { SITE, waLink } from "@/lib/site";
+import { useHoneypot } from "@/components/useHoneypot";
 import { IconCheck } from "@/components/icons";
 
 export default function ContactForm() {
@@ -10,9 +11,11 @@ export default function ContactForm() {
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
+  const { field: honeypot, human } = useHoneypot();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!human()) { setState("done"); return; }
     setState("sending");
     await submitInquiry({ name, phone, message });
     setState("done");
@@ -39,6 +42,7 @@ export default function ContactForm() {
       onSubmit={onSubmit}
       className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8"
     >
+      {honeypot}
       <div className="grid gap-3 sm:grid-cols-2">
         <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name"
           className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-sky)]" />

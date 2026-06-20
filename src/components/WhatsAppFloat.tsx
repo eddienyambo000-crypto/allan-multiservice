@@ -1,10 +1,14 @@
-import { SITE, waLink } from "@/lib/site";
+"use client";
+
+import { SITE } from "@/lib/site";
+import { useSettings } from "@/components/SettingsProvider";
 import { IconWhatsApp } from "@/components/icons";
 
 export default function WhatsAppFloat() {
+  const { wa } = useSettings();
   return (
     <a
-      href={waLink(`Hi ${SITE.shortName}, I'd like to ask about a listing.`)}
+      href={wa(`Hi ${SITE.shortName}, I'd like to ask about a listing.`)}
       target="_blank"
       rel="noopener"
       aria-label="Chat on WhatsApp"
