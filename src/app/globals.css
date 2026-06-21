@@ -72,7 +72,7 @@ body {
   background: linear-gradient(135deg, #0C8CE0 0%, #0A6FC0 55%, #064E8C 120%);
   color: #fff;
 }
-.band-sky :where(h1, h2, h3, p, span, a, li, dt, dd, blockquote, figcaption) { color: inherit; }
+/* Recolor the band's eyebrow only; cards inside keep their own text colors. */
 .band-sky .eyebrow { color: #BFE3FF; }
 .band-pink {
   background: linear-gradient(135deg, var(--color-pink-soft) 0%, #FFD3E4 100%);
