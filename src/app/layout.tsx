@@ -7,6 +7,7 @@ import { SettingsProvider } from "@/components/SettingsProvider";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -77,9 +78,13 @@ export default async function RootLayout({
             Skip to content
           </a>
           <Nav />
-          <main id="main" className="flex-1">{children}</main>
+          <main id="main" className="flex-1 pb-20 lg:pb-0">{children}</main>
           <Footer />
           <WhatsAppFloat />
+          {/* Mobile bottom nav — floating pill, hidden on desktop */}
+          <div className="fixed inset-x-0 bottom-3 z-40 flex justify-center px-4 lg:hidden">
+            <InteractiveMenu />
+          </div>
         </SettingsProvider>
       </body>
     </html>
